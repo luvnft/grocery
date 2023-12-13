@@ -100,6 +100,7 @@ export default function Mic() {
 
 
     return (
+    <div style={{alignItems: 'center', display: 'flex', flexDirection: 'column'}}>
         <div>
             <button  onClick={toggleRecording} type="button" className="record_button" style={{
                 alignItems: 'center',
@@ -124,9 +125,10 @@ export default function Mic() {
                 {/* {isRecording ? "Stop Recording" : "Start Recording" } */}
             </button>
             <br/>
-            <p style={{color: 'white', flex: 1, height: '400px'}}>
-            {transcript}
-            </p>
         </div>
+            <a>
+            {transcript}
+            </a>
+    </div>
     );
 }
