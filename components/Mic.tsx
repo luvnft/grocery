@@ -9,6 +9,7 @@ import List, { AisleData } from './List';
 import getIngredients from '@/app/actions/getIngredients';
 import loadingAnimation from "../animations/loading_animation.json";
 import { useLottie } from 'lottie-react';
+import Xarrow from 'react-xarrows';
 
 const mimeType = "audio/webm";
 
@@ -166,9 +167,21 @@ export default function Mic() {
 
     return (
     <div style={{alignItems: 'center', display: 'flex', flexDirection: 'column'}}>
-        <div hidden={isLoading}>
-            {RecordButton}
+        <div className="relative w-full h-full flex items-center justify-center" hidden={isLoading}>
+            <div id="RecordButton" className="absolute px-1">
+                    {RecordButton}
+            </div>
+            <div id="ExplainerText" className="absolute left-1/2 transform translate-x-[50%] max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg 2xl:max-w-xl px-1">
+                <p className='font-PermanentMarker text-black whitespace-normal break-words'>Tap Me to {isRecording ? "Stop" : "Start"} Recording</p>
+            </div>
+            <Xarrow
+                start="ExplainerText"
+                end="RecordButton"
+                strokeWidth={2}
+                color="black"
+            />
         </div>
+
         <div hidden={!isLoading}>
             {LoadingView}
         </div>
