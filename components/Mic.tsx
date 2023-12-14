@@ -1,14 +1,19 @@
 'use client'
 import 'regenerator-runtime/runtime'
 
-import React, { useCallback, useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { useReward } from 'react-rewards';
 import { LiveAudioVisualizer } from 'react-audio-visualize'
+import { createClient } from '@/utils/supabase/server'
+import { headers, cookies } from 'next/headers'
+import List, { AisleData } from './List';
 
 const mimeType = "audio/webm";
 
 export default function Mic() {
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const {
         transcript,
         listening,
@@ -24,6 +29,7 @@ export default function Mic() {
 
     const mediaRecorder = useRef<MediaRecorder | undefined>();
     const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
+    const [sectionData, setSectionData] = useState<AisleData[]>();
 
     const getStream = useCallback(async () => {
         if ("MediaRecorder" in window) {
@@ -45,6 +51,13 @@ export default function Mic() {
         if (isRecording) {
             SpeechRecognition.stopListening();
             stopRecording();
+            const edgeResponse = await supabase.functions.invoke('get_ingredients', {
+                body: JSON.stringify({query: transcript})
+            })
+            if (edgeResponse && edgeResponse.data.response) {
+                console.log(edgeResponse.data.response);
+                setSectionData(JSON.parse(edgeResponse.data.response) as AisleData[]);
+            }
             resetTranscript();
         } else {
             SpeechRecognition.startListening({continuous: true});
@@ -55,6 +68,8 @@ export default function Mic() {
         }
         setIsRecording(!isRecording);
     }, [isRecording, setIsRecording]);
+
+    const ListSection = useMemo(() => List(sectionData), [sectionData]);
 
     const startRecording = useCallback(async (stream: MediaStream) => {
         const media = new MediaRecorder(stream!, { mimeType });
@@ -72,6 +87,7 @@ export default function Mic() {
     const stopRecording = () => {
         if (mediaRecorder && mediaRecorder.current) {
             mediaRecorder.current.stop();
+            // TODO: try Whisper AI instead!!
             const audioBlob = new Blob(audioChunks, { type: mimeType });
         }
         mediaRecorder.current = undefined;
@@ -122,13 +138,10 @@ export default function Mic() {
                     />
                 ) : (<div style={{backgroundColor: '#ab1515', height: '60px', width: '60px', borderRadius: '30px'}}/>)}
                 </span>
-                {/* {isRecording ? "Stop Recording" : "Start Recording" } */}
             </button>
             <br/>
         </div>
-            <a>
-            {transcript}
-            </a>
+            
     </div>
     );
 }

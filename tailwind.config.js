@@ -15,6 +15,12 @@ module.exports = {
         },
       },
     },
+    fontSize: {
+      sm: ['14px', '16px'],
+      base: ['16px', '18px'],
+      lg: ['20px', '22px'],
+      xl: ['24px', '26px'],
+    }
   },
   plugins: [],
 }
