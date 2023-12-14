@@ -16,6 +16,7 @@ export default function Mic() {
         transcript,
         listening,
         resetTranscript,
+        browserSupportsSpeechRecognition,
       } = useSpeechRecognition();
     const [isRecording, setIsRecording ] = useState(false);
     const { reward: carrotReward } = useReward('carrotReward', 'emoji', {emoji: ['🥕']});
@@ -51,7 +52,7 @@ export default function Mic() {
             stopRecording();
             let newSections = [];
             if (transcript.length > 2) {
-                newSections = await getIngredients(transcript);
+                newSections = await getIngredients(sectionData, transcript);
                 if (newSections.aisles) {
                     setSectionData(newSections.aisles);
                     resetTranscript();
@@ -63,8 +64,13 @@ export default function Mic() {
                 alert("Sorry, we couldn't quite hear that. Please try again.");
             }
         } else {
-            SpeechRecognition.startListening({continuous: true});
             let stream = await getStream();
+            SpeechRecognition.startListening({continuous: true});
+            // TODO: remove this once we use Whisper for audio transcription instead
+            if (!browserSupportsSpeechRecognition) {
+                alert("Sorry, this browser isn't supported.");
+                return;
+            }
             if (stream) {
                 startRecording(stream);
             }
@@ -127,19 +133,20 @@ export default function Mic() {
                 justifyContent: 'center',
                 width: '80px',
                 height: '80px',
-                backgroundColor: '#700b0b',
+                backgroundColor: '#E94646',
                 borderRadius: '40px',
+                borderWidth: '4px',
+                borderColor: 'black'
             }}>
                 <span>
                 <span id="carrotReward" /><span id="broccoliReward" /><span id="lettuceReward" /><span id="eggplantReward" /><span id="avocadoReward" />
-                {mediaRecorder.current ? (
+                {mediaRecorder.current &&
                     <LiveAudioVisualizer
-                        barColor='#ab1515'
+                        barColor='black'
                         mediaRecorder={mediaRecorder.current}
                         width={'40px'}
                         height={'40px'}
-                    />
-                ) : (<div style={{backgroundColor: '#ab1515', height: '60px', width: '60px', borderRadius: '30px'}}/>)}
+                    />}
                 </span>
             </button>
             <br/>

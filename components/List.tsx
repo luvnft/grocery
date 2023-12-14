@@ -1,4 +1,3 @@
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 export type AisleData = {
     name: string,
@@ -6,20 +5,15 @@ export type AisleData = {
 }
 
 export default function List(sectionData?: AisleData[]) {
-    // const supabase = createClientComponentClient();
-
-    // const {
-    //     data: { user },
-    //   } = await supabase.auth.getUser()
 
     const HeaderComponent = (header: string) => {
         return (
-                <a id={header} className="text-lg font-bold">{header}</a>
+                <p id={header} className="text-lg text-spilltNavy text-center font-PermanentMarker flex-1 mb-2">{header}</p>
         );
     }
     const ItemComponent = (item: string, index: number) => {
         return (
-                <p key={index} className="text-base">{item}</p>
+                <p key={index} className="text-base text-black text-center mb-1.5">{item}</p>
         );
     }
 
@@ -29,7 +23,7 @@ export default function List(sectionData?: AisleData[]) {
             return ItemComponent(item, index);
         });
         return (
-            <div key={"section"+aisleName}>
+            <div className={"flex flex-col items-center justify-center mb-4"} key={"section"+aisleName}>
                 {HeaderComponent(aisleName)}
                 {items}
             </div>
