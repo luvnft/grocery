@@ -25,7 +25,7 @@ export default function Mic() {
         autoplay: true,
         animationData: loadingAnimation,
       };
-    const { View: LoadingView } = useLottie(defaultAnimationOptions, {height: '100px', width: '100px'}); 
+    const { View: LoadingView } = useLottie(defaultAnimationOptions, {height: '50px', width: '50px'}); 
     const [isRecording, setIsRecording ] = useState(false);
     const { reward: carrotReward } = useReward('carrotReward', 'emoji', {emoji: ['🥕']});
     const { reward: broccoliReward } = useReward('broccoliReward', 'emoji', {emoji: ['🥦']});
@@ -150,43 +150,47 @@ export default function Mic() {
                 }}>
                     <span>
                     <span id="carrotReward" /><span id="broccoliReward" /><span id="lettuceReward" /><span id="eggplantReward" /><span id="avocadoReward" />
-                    {mediaRecorder.current &&
+                    {/* {mediaRecorder.current &&
                         <LiveAudioVisualizer
                             barColor='black'
                             mediaRecorder={mediaRecorder.current}
                             width={'40px'}
                             height={'40px'}
-                        />}
+                        />} */}
                     </span>
+                    {isLoading ? LoadingView : <></>}
                 </button>
                 </div>
                 </div>
         );
-    }, [isLoading, toggleRecording, listening]);
+    }, [toggleRecording, listening, isLoading]);
+
+    const MicElement = useMemo(() => {
+    return (
+    <div className="relative w-full h-full flex items-center justify-center">
+        <div id="RecordButton" className="absolute px-1">
+                {RecordButton}
+        </div>
+        <div id="ExplainerText" className="absolute left-1/2 transform translate-x-[50%] max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg 2xl:max-w-xl px-1">
+            <p className='font-PermanentMarker text-black whitespace-normal break-words'>Tap Me to {isRecording ? "Stop" : "Start"} Recording</p>
+        </div>
+        <Xarrow
+            start="ExplainerText"
+            end="RecordButton"
+            strokeWidth={2}
+            color="black"
+        />
+    </div>);
+    }, [RecordButton]);
 
 
     return (
     <div style={{alignItems: 'center', display: 'flex', flexDirection: 'column'}}>
-        <div className="relative w-full h-full flex items-center justify-center" hidden={isLoading}>
-            <div id="RecordButton" className="absolute px-1">
-                    {RecordButton}
-            </div>
-            <div id="ExplainerText" className="absolute left-1/2 transform translate-x-[50%] max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg 2xl:max-w-xl px-1">
-                <p className='font-PermanentMarker text-black whitespace-normal break-words'>Tap Me to {isRecording ? "Stop" : "Start"} Recording</p>
-            </div>
-            <Xarrow
-                start="ExplainerText"
-                end="RecordButton"
-                strokeWidth={2}
-                color="black"
-            />
-        </div>
-
-        <div hidden={!isLoading}>
-            {LoadingView}
-        </div>
+        {MicElement}
         <br/>
-        {ListSection} 
+        <div className='mt-6'>
+            {ListSection} 
+        </div>
     </div>
     );
 }
