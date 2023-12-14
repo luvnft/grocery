@@ -24,31 +24,31 @@ export default function List(sectionData?: AisleData[]) {
 
     const HeaderComponent = (header: string) => {
         return (
-                <p className="text-lg font-bold">{header}</p>
+                <a id={header} className="text-lg font-bold">{header}</a>
         );
     }
-    const ItemComponent = (item: string) => {
+    const ItemComponent = (item: string, index: number) => {
         return (
-                <p className="text-base">{item}</p>
+                <p key={index} className="text-base">{item}</p>
         );
     }
 
-    const sectionDataList = sectionData?.map((aisle) => {
+    const sectionDataList = sectionData ? sectionData.map((aisle) => {
         const aisleName = aisle.name;
-        const items = aisle.items.map((item) => {
-            return ItemComponent(item);
+        const items = aisle.items.map((item, index) => {
+            return ItemComponent(item, index);
         });
         return (
-            <>
-            {HeaderComponent(aisleName)}
-            {items}
-            </>
+            <div key={"section"+aisleName}>
+                {HeaderComponent(aisleName)}
+                {items}
+            </div>
         )
-    })
+    }) : (<></>);
 
     return (
-        <>
-        {sectionDataList}
-        </>
+        <span key={"section data list"}>
+            {sectionDataList}
+        </span>
     )
 }

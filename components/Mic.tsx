@@ -5,15 +5,13 @@ import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react'
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { useReward } from 'react-rewards';
 import { LiveAudioVisualizer } from 'react-audio-visualize'
-import { createClient } from '@/utils/supabase/server'
-import { headers, cookies } from 'next/headers'
+
 import List, { AisleData } from './List';
+import getIngredients from '@/app/actions/getIngredients';
 
 const mimeType = "audio/webm";
 
 export default function Mic() {
-    const cookieStore = cookies();
-    const supabase = createClient(cookieStore);
     const {
         transcript,
         listening,
@@ -51,14 +49,19 @@ export default function Mic() {
         if (isRecording) {
             SpeechRecognition.stopListening();
             stopRecording();
-            const edgeResponse = await supabase.functions.invoke('get_ingredients', {
-                body: JSON.stringify({query: transcript})
-            })
-            if (edgeResponse && edgeResponse.data.response) {
-                console.log(edgeResponse.data.response);
-                setSectionData(JSON.parse(edgeResponse.data.response) as AisleData[]);
+            let newSections = [];
+            if (transcript.length > 2) {
+                newSections = await getIngredients(transcript);
+                if (newSections.aisles) {
+                    setSectionData(newSections.aisles);
+                    resetTranscript();
+                } else {
+                    alert("Sorry, something went wrong.");
+                    setSectionData([]);
+                }
+            }  else {
+                alert("Sorry, we couldn't quite hear that. Please try again.");
             }
-            resetTranscript();
         } else {
             SpeechRecognition.startListening({continuous: true});
             let stream = await getStream();
@@ -67,7 +70,7 @@ export default function Mic() {
             }
         }
         setIsRecording(!isRecording);
-    }, [isRecording, setIsRecording]);
+    }, [isRecording, setIsRecording, setSectionData, transcript]);
 
     const ListSection = useMemo(() => List(sectionData), [sectionData]);
 
@@ -141,6 +144,7 @@ export default function Mic() {
             </button>
             <br/>
         </div>
+            {ListSection}
             
     </div>
     );
