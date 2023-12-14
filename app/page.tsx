@@ -2,30 +2,18 @@ import { createClient } from '@/utils/supabase/server'
 import Mic from '@/components/Mic'
 import { cookies } from 'next/headers'
 import React from 'react'
-import List from '@/components/List'
+import AuthButton from '@/components/AuthButton'
 
 
 export default function Index() {
   const cookieStore = cookies()
-
-  const canInitSupabaseClient = () => {
-    // This function is just for the interactive tutorial.
-    // Feel free to remove it once you have Supabase connected.
-    try {
-      createClient(cookieStore)
-      return true
-    } catch (e) {
-      return false
-    }
-  }
-
-  const isSupabaseConnected = canInitSupabaseClient()
+  const supabase = createClient(cookieStore);
 
   return (
     <div className="flex-1 w-full flex flex-col gap-20 items-center">
       <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
         <div className="w-full max-w-4xl flex justify-end items-center p-3 text-sm">
-          {isSupabaseConnected && <button />}
+        <AuthButton />
         </div>
       </nav>
 

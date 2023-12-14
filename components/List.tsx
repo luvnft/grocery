@@ -1,26 +1,16 @@
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+
 export type AisleData = {
     name: string,
     items: string[]
 }
 
 export default function List(sectionData?: AisleData[]) {
-    // const sectionData = [
-    //     {
-    //         "name" : "Dairy",
-    //         "items": [
-    //         "milk",
-    //         "eggs",
-    //         "cottage cheese",
-    //     ]},
-    //     {
-    //         "name": "Baking",
-    //         "items": [
-    //             "flour",
-    //             "granulated sugar",
-    //             "brown sugar",
-    //         ]
-    //     }
-    // ]
+    // const supabase = createClientComponentClient();
+
+    // const {
+    //     data: { user },
+    //   } = await supabase.auth.getUser()
 
     const HeaderComponent = (header: string) => {
         return (

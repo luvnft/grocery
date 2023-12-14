@@ -6,6 +6,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@supabase/auth-helpers-nextjs": "^0.8.7",
     "@supabase/ssr": "latest",
     "@supabase/supabase-js": "latest",
     "@types/react-speech-recognition": "^3.9.5",

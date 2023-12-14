@@ -121,7 +121,7 @@ export default function Mic() {
     return (
     <div style={{alignItems: 'center', display: 'flex', flexDirection: 'column'}}>
         <div>
-            <button  onClick={toggleRecording} type="button" className="record_button" style={{
+            <button  onClick={toggleRecording} type="button" className={isRecording ? "sm:animate-pulse" : ""} style={{
                 alignItems: 'center',
                 display: 'flex',
                 justifyContent: 'center',
