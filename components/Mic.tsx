@@ -5,9 +5,10 @@ import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react'
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { useReward } from 'react-rewards';
 import { LiveAudioVisualizer } from 'react-audio-visualize'
-
 import List, { AisleData } from './List';
 import getIngredients from '@/app/actions/getIngredients';
+import loadingAnimation from "../animations/loading_animation.json";
+import { useLottie } from 'lottie-react';
 
 const mimeType = "audio/webm";
 
@@ -18,6 +19,12 @@ export default function Mic() {
         resetTranscript,
         browserSupportsSpeechRecognition,
       } = useSpeechRecognition();
+      const defaultAnimationOptions = {
+        loop: true,
+        autoplay: true,
+        animationData: loadingAnimation,
+      };
+    const { View: LoadingView } = useLottie(defaultAnimationOptions, {height: '100px', width: '100px'}); 
     const [isRecording, setIsRecording ] = useState(false);
     const { reward: carrotReward } = useReward('carrotReward', 'emoji', {emoji: ['🥕']});
     const { reward: broccoliReward } = useReward('broccoliReward', 'emoji', {emoji: ['🥦']});
@@ -29,6 +36,7 @@ export default function Mic() {
     const mediaRecorder = useRef<MediaRecorder | undefined>();
     const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
     const [sectionData, setSectionData] = useState<AisleData[]>();
+    const [isLoading, setIsLoading] = useState(false);
 
     const getStream = useCallback(async () => {
         if ("MediaRecorder" in window) {
@@ -47,11 +55,13 @@ export default function Mic() {
     }, []);
 
     const toggleRecording = useCallback(async () => {
+        // TODO: update this once we use Whisper for audio transcription instead
         if (isRecording) {
             SpeechRecognition.stopListening();
-            stopRecording();
+            // stopRecording();
             let newSections = [];
             if (transcript.length > 2) {
+                setIsLoading(true);
                 newSections = await getIngredients(sectionData, transcript);
                 if (newSections.aisles) {
                     setSectionData(newSections.aisles);
@@ -60,20 +70,20 @@ export default function Mic() {
                     alert("Sorry, something went wrong.");
                     setSectionData([]);
                 }
+                setIsLoading(false);
             }  else {
                 alert("Sorry, we couldn't quite hear that. Please try again.");
             }
         } else {
-            let stream = await getStream();
+            // let stream = await getStream();
             SpeechRecognition.startListening({continuous: true});
-            // TODO: remove this once we use Whisper for audio transcription instead
             if (!browserSupportsSpeechRecognition) {
                 alert("Sorry, this browser isn't supported.");
                 return;
             }
-            if (stream) {
-                startRecording(stream);
-            }
+            // if (stream) {
+            //     startRecording(stream);
+            // }
         }
         setIsRecording(!isRecording);
     }, [isRecording, setIsRecording, setSectionData, transcript]);
@@ -123,36 +133,47 @@ export default function Mic() {
         }
     }, [transcript, listening]);
 
+    const RecordButton = useMemo(() => {
+        return (
+            <div className="flex">
+                <div className="relative">
+                <button  onClick={toggleRecording} type="button" className={(listening ? "sm:animate-pulse " : "") + "bg-spilltRed"} style={{
+                    alignItems: 'center',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    width: '80px',
+                    height: '80px',
+                    borderRadius: '40px',
+                    borderWidth: '4px',
+                    borderColor: 'black'
+                }}>
+                    <span>
+                    <span id="carrotReward" /><span id="broccoliReward" /><span id="lettuceReward" /><span id="eggplantReward" /><span id="avocadoReward" />
+                    {mediaRecorder.current &&
+                        <LiveAudioVisualizer
+                            barColor='black'
+                            mediaRecorder={mediaRecorder.current}
+                            width={'40px'}
+                            height={'40px'}
+                        />}
+                    </span>
+                </button>
+                </div>
+                </div>
+        );
+    }, [isLoading, toggleRecording, listening]);
+
 
     return (
     <div style={{alignItems: 'center', display: 'flex', flexDirection: 'column'}}>
-        <div>
-            <button  onClick={toggleRecording} type="button" className={isRecording ? "sm:animate-pulse" : ""} style={{
-                alignItems: 'center',
-                display: 'flex',
-                justifyContent: 'center',
-                width: '80px',
-                height: '80px',
-                backgroundColor: '#E94646',
-                borderRadius: '40px',
-                borderWidth: '4px',
-                borderColor: 'black'
-            }}>
-                <span>
-                <span id="carrotReward" /><span id="broccoliReward" /><span id="lettuceReward" /><span id="eggplantReward" /><span id="avocadoReward" />
-                {mediaRecorder.current &&
-                    <LiveAudioVisualizer
-                        barColor='black'
-                        mediaRecorder={mediaRecorder.current}
-                        width={'40px'}
-                        height={'40px'}
-                    />}
-                </span>
-            </button>
-            <br/>
+        <div hidden={isLoading}>
+            {RecordButton}
         </div>
-            {ListSection}
-            
+        <div hidden={!isLoading}>
+            {LoadingView}
+        </div>
+        <br/>
+        {ListSection} 
     </div>
     );
 }

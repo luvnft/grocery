@@ -16,6 +16,7 @@ module.exports = {
         spilltNavy: '#343298',
         spilltCreme: '#FFF6EA',
         spilltLightPurple: '#F2F2FF',
+        spilltRed: '#E94646',
       },
       fontFamily: {
         PermanentMarker: ['Permanent Marker'],
