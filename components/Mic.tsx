@@ -25,7 +25,7 @@ export default function Mic() {
         autoplay: true,
         animationData: loadingAnimation,
       };
-    const { View: LoadingView } = useLottie(defaultAnimationOptions, {height: '50px', width: '50px'}); 
+    const { View: LoadingView } = useLottie(defaultAnimationOptions, {height: '100px', width: '100px'}); 
     const [isRecording, setIsRecording ] = useState(false);
     const { reward: carrotReward } = useReward('carrotReward', 'emoji', {emoji: ['🥕']});
     const { reward: broccoliReward } = useReward('broccoliReward', 'emoji', {emoji: ['🥦']});
@@ -56,14 +56,17 @@ export default function Mic() {
         }
     }, []);
 
+    const wait = (n: number) => new Promise((resolve) => setTimeout(resolve, n));
+
+
     const toggleRecording = useCallback(async () => {
         // TODO: update this once we use Whisper for audio transcription instead
         if (isRecording) {
-            SpeechRecognition.stopListening();
+            setIsLoading(true);
+            await SpeechRecognition.stopListening();
             // stopRecording();
             let newSections = [];
             if (transcript.length > 2) {
-                setIsLoading(true);
                 newSections = await getIngredients(sectionData, transcript);
                 if (newSections.aisles) {
                     setSectionData(newSections.aisles);
@@ -72,7 +75,6 @@ export default function Mic() {
                     alert("Sorry, something went wrong.");
                     setSectionData([]);
                 }
-                setIsLoading(false);
             }  else {
                 alert("Sorry, we couldn't quite hear that. Please try again.");
             }
@@ -88,6 +90,7 @@ export default function Mic() {
             // }
         }
         setIsRecording(!isRecording);
+        setIsLoading(false);
     }, [isRecording, setIsRecording, setSectionData, transcript]);
 
     const ListSection = useMemo(() => List(sectionData), [sectionData]);
@@ -114,26 +117,35 @@ export default function Mic() {
         mediaRecorder.current = undefined;
     }
 
+
+
     useEffect(() => {
         if (!transcript) {
             return;
         }
-        if (transcript.includes('carrot')) {
+        const newMatches = (testString: string) => {
+            const regex = new RegExp(testString, "g")
+            const numNew = (transcript.match(regex) || []).length;
+            const numOld = (latestTranscript.match(regex) || []).length;
+            return numNew > numOld;
+        }
+        if (newMatches('carrot')) {
             carrotReward();
         }
-        if (transcript.includes('avocado')) {
+        if (newMatches('avocado')) {
             avocadoReward();
         }
-        if (transcript.includes('lettuce')) {
+        if (newMatches('lettuce')) {
             lettuceReward();
         }
-        if (transcript.includes('eggplant')) {
+        if (newMatches('eggplant')) {
             eggplantReward();
         }
-        if (transcript.includes('broccoli')) {
+        if (newMatches('broccoli')) {
             broccoliReward();
         }
-    }, [transcript, listening]);
+        setLatestTranscript(transcript);
+    }, [transcript]);
 
     const micButtonClass = "bg-spilltRed w-20 h-20 border-4 border-black rounded-full";
 
@@ -152,12 +164,12 @@ export default function Mic() {
                             height={'40px'}
                         />} */}
                     </span>
-                    {isLoading ? LoadingView : <></>}
                 </button>
                 </div>
                 </div>
         );
-    }, [toggleRecording, isRecording, isLoading]);
+    }, [toggleRecording, isRecording]);
+
 
     const MicElement = useMemo(() => {
     return (
@@ -165,8 +177,11 @@ export default function Mic() {
         <div id="RecordButton" className="absolute px-1">
                 {RecordButton}
         </div>
+        <div id="LoadingAnimation" className={isLoading ? 'absolute px-1' : 'absolute px-1 hidden'}>
+            {LoadingView}
+        </div>
         <div id="ExplainerText" className="absolute left-1/2 transform translate-x-[50%] px-1 mr-[20%] md:mr-[25%]">
-            <p className='font-PermanentMarker text-sm sm:text-md md:text-lg text-black whitespace-normal break-words'>Tap Me to {isRecording ? "Stop" : "Start"} Recording</p>
+            <p className='font-PermanentMarker text-sm sm:text-md md:text-lg text-black whitespace-normal break-words'>{isLoading ? "LOADING " : ""}Tap Me to {isRecording ? "Stop" : "Start"} Recording</p>
         </div>
         <Xarrow
             start="ExplainerText"
@@ -175,7 +190,7 @@ export default function Mic() {
             color="black"
         />
     </div>);
-    }, [RecordButton]);
+    }, [RecordButton, isLoading, LoadingView]);
 
 
     return (
