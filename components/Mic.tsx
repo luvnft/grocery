@@ -32,6 +32,7 @@ export default function Mic() {
     const { reward: eggplantReward } = useReward('eggplantReward', 'emoji', {emoji: ['🍆']});
     const { reward: lettuceReward } = useReward('lettuceReward', 'emoji', {emoji: ['🥬']});
     const { reward: avocadoReward } = useReward('avocadoReward', 'emoji', {emoji: ['🥑']});
+    const [latestTranscript, setLatestTranscript] = useState('');
     
 
     const mediaRecorder = useRef<MediaRecorder | undefined>();
@@ -134,7 +135,7 @@ export default function Mic() {
         }
     }, [transcript, listening]);
 
-    const micButtonClass = "bg-spilltRed w-10 h-10 sm:w-15 sm:h-15 md:w-20 md:h-20 border-4 border-black rounded-full";
+    const micButtonClass = "bg-spilltRed w-20 h-20 border-4 border-black rounded-full";
 
     const RecordButton = useMemo(() => {
         return (
