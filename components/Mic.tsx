@@ -134,20 +134,13 @@ export default function Mic() {
         }
     }, [transcript, listening]);
 
+    const micButtonClass = "bg-spilltRed w-10 h-10 sm:w-15 sm:h-15 md:w-20 md:h-20 border-4 border-black rounded-full";
+
     const RecordButton = useMemo(() => {
         return (
             <div className="flex">
                 <div className="relative">
-                <button  onClick={toggleRecording} type="button" className={(listening ? "sm:animate-pulse " : "") + "bg-spilltRed"} style={{
-                    alignItems: 'center',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    width: '80px',
-                    height: '80px',
-                    borderRadius: '40px',
-                    borderWidth: '4px',
-                    borderColor: 'black'
-                }}>
+                <button  onClick={toggleRecording} type="button" className={micButtonClass + (isRecording ? " animate-pulse" : "")}>
                     <span>
                     <span id="carrotReward" /><span id="broccoliReward" /><span id="lettuceReward" /><span id="eggplantReward" /><span id="avocadoReward" />
                     {/* {mediaRecorder.current &&
@@ -163,7 +156,7 @@ export default function Mic() {
                 </div>
                 </div>
         );
-    }, [toggleRecording, listening, isLoading]);
+    }, [toggleRecording, isRecording, isLoading]);
 
     const MicElement = useMemo(() => {
     return (
@@ -171,8 +164,8 @@ export default function Mic() {
         <div id="RecordButton" className="absolute px-1">
                 {RecordButton}
         </div>
-        <div id="ExplainerText" className="absolute left-1/2 transform translate-x-[50%] max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg 2xl:max-w-xl px-1">
-            <p className='font-PermanentMarker text-black whitespace-normal break-words'>Tap Me to {isRecording ? "Stop" : "Start"} Recording</p>
+        <div id="ExplainerText" className="absolute left-1/2 transform translate-x-[50%] px-1 mr-[20%] md:mr-[25%]">
+            <p className='font-PermanentMarker text-sm sm:text-md md:text-lg text-black whitespace-normal break-words'>Tap Me to {isRecording ? "Stop" : "Start"} Recording</p>
         </div>
         <Xarrow
             start="ExplainerText"
