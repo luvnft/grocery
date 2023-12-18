@@ -233,7 +233,7 @@ export default function Mic() {
             <div className={className}>
                 <div className={"flex flex-col justify-center items-center bg-spilltCreme p-6 rounded p-10 rounded-3xl"}>
                     <p className='font-PermanentMarker text-spilltNavy pb-4'>Great Success!</p>
-                    <p className={"text-spilltNavy pb-4"}>Check your email for a link to confirm your account and complete sending the list.</p>
+                    <p className={"text-spilltNavy pb-4"}>Check your email for the list.</p>
                     <button
                         className={"font-PermanentMarker text-spilltNavy border-2 border-spilltNavy bg-white py-1.5 px-4 rounded-full"}
                         onClick={dismissSuccessForm}>

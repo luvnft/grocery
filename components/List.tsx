@@ -40,7 +40,6 @@ export default function List(sectionData?: AisleData[], setShowAuth?: (shouldSho
         if (session) {
             console.log('we are logged in!');
         } else {
-            console.log('not logged in');
             if (setShowAuth) {
                 setShowAuth(true);
             }
