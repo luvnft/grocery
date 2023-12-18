@@ -7,9 +7,11 @@ import { useReward } from 'react-rewards';
 import { LiveAudioVisualizer } from 'react-audio-visualize'
 import List, { AisleData } from './List';
 import getIngredients from '@/app/actions/getIngredients';
+import sendList from '@/app/actions/sendList';
 import loadingAnimation from "../animations/loading_animation.json";
 import { useLottie } from 'lottie-react';
 import Xarrow from 'react-xarrows';
+import EmailConfirmationForm from './EmailConfirmForm';
 
 const mimeType = "audio/webm";
 
@@ -27,17 +29,19 @@ export default function Mic() {
       };
     const { View: LoadingView } = useLottie(defaultAnimationOptions, {height: '100px', width: '100px'}); 
     const [isRecording, setIsRecording ] = useState(false);
+    const [showEmailSuccess, setShowEmailSuccess] = useState(false);
     const { reward: carrotReward } = useReward('carrotReward', 'emoji', {emoji: ['🥕']});
     const { reward: broccoliReward } = useReward('broccoliReward', 'emoji', {emoji: ['🥦']});
     const { reward: eggplantReward } = useReward('eggplantReward', 'emoji', {emoji: ['🍆']});
     const { reward: lettuceReward } = useReward('lettuceReward', 'emoji', {emoji: ['🥬']});
     const { reward: avocadoReward } = useReward('avocadoReward', 'emoji', {emoji: ['🥑']});
     const [latestTranscript, setLatestTranscript] = useState('');
-    
 
     const mediaRecorder = useRef<MediaRecorder | undefined>();
     const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
-    const [sectionData, setSectionData] = useState<AisleData[]>();
+    const [sectionData, setSectionData] = useState<AisleData[]>([
+
+    ]);
     const [isLoading, setIsLoading] = useState(false);
 
     const getStream = useCallback(async () => {
@@ -56,9 +60,6 @@ export default function Mic() {
         }
     }, []);
 
-    const wait = (n: number) => new Promise((resolve) => setTimeout(resolve, n));
-
-
     const toggleRecording = useCallback(async () => {
         // TODO: update this once we use Whisper for audio transcription instead
         if (isRecording) {
@@ -66,7 +67,7 @@ export default function Mic() {
             await SpeechRecognition.stopListening();
             // stopRecording();
             let newSections = [];
-            if (transcript.length > 2) {
+            if (transcript && transcript.length > 2) {
                 newSections = await getIngredients(sectionData, transcript);
                 if (newSections.aisles) {
                     setSectionData(newSections.aisles);
@@ -93,7 +94,8 @@ export default function Mic() {
         setIsLoading(false);
     }, [isRecording, setIsRecording, setSectionData, transcript]);
 
-    const ListSection = useMemo(() => List(sectionData), [sectionData]);
+    const [showAuth, setShowAuth] = useState(false);
+    const ListSection = useMemo(() => List(sectionData, setShowAuth), [sectionData, setShowAuth]);
 
     const startRecording = useCallback(async (stream: MediaStream) => {
         const media = new MediaRecorder(stream!, { mimeType });
@@ -117,10 +119,8 @@ export default function Mic() {
         mediaRecorder.current = undefined;
     }
 
-
-
     useEffect(() => {
-        if (!transcript) {
+        if (!transcript || !(transcript.length > 0)) {
             return;
         }
         const newMatches = (testString: string) => {
@@ -192,9 +192,62 @@ export default function Mic() {
     </div>);
     }, [RecordButton, isLoading, LoadingView]);
 
+    const dismissAuthModal = useCallback(() => {
+        setShowAuth(false);
+    }, [setShowAuth, sectionData]);
+
+    const confirmEmail = useCallback(async (email: string) => {
+        console.log('we called confirm email!!!', email);
+        const response = await sendList(email, sectionData);
+        console.log('huh ok then', response);
+        if (response) {
+            setShowAuth(false);
+            setShowEmailSuccess(true);
+        } else {
+            setShowAuth(false);
+            alert("Sorry, something went wrong.");
+        }
+    }, [sectionData, setShowAuth, setShowEmailSuccess]);
+
+    const dismissSuccessForm = useCallback(() => {
+        setShowEmailSuccess(false);
+    }, [setShowEmailSuccess]);
+
+    const modalClass = "fixed inset-0 bg-spilltLightPurple z-50 flex flex-col justify-center items-center";
+    const AuthForm = useMemo(() => {
+        const className = (showAuth ? '': 'hidden ') + modalClass;
+        return (
+            <div className={className}>
+                <EmailConfirmationForm
+                    dismissModal={dismissAuthModal}
+                    onEmailCofirm={confirmEmail}
+                    isVisible={showAuth}
+                />
+            </div>
+        )
+    }, [showAuth, dismissAuthModal]);
+
+    const EmailSuccessForm = useMemo(() => {
+        const className = (showEmailSuccess ? '' : 'hidden ') + modalClass;
+        return (
+            <div className={className}>
+                <div className={"flex flex-col justify-center items-center bg-spilltCreme p-6 rounded p-10 rounded-3xl"}>
+                    <p className='font-PermanentMarker text-spilltNavy pb-4'>Great Success!</p>
+                    <p className={"text-spilltNavy pb-4"}>Check your email for a link to confirm your account and complete sending the list.</p>
+                    <button
+                        className={"font-PermanentMarker text-spilltNavy border-2 border-spilltNavy bg-white py-1.5 px-4 rounded-full"}
+                        onClick={dismissSuccessForm}>
+                            Dismiss
+                    </button>
+                </div>
+            </div>
+        )
+    }, [showEmailSuccess]);
 
     return (
     <div style={{alignItems: 'center', display: 'flex', flexDirection: 'column'}}>
+        {AuthForm}
+        {EmailSuccessForm}
         {MicElement}
         <br/>
         <div className='mt-6'>

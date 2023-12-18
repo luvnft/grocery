@@ -1,11 +1,13 @@
+"use client"
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useState, useMemo } from 'react';
 
 export type AisleData = {
     name: string,
     items: string[]
 }
 
-export default function List(sectionData?: AisleData[]) {
-
+export default function List(sectionData?: AisleData[], setShowAuth?: (shouldShowAuth: boolean) => void) {
     const HeaderComponent = (header: string) => {
         return (
                 <p id={header} className="text-lg text-spilltNavy text-center font-PermanentMarker flex-1 mb-2">{header}</p>
@@ -30,9 +32,31 @@ export default function List(sectionData?: AisleData[]) {
         )
     }) : (<></>);
 
+    const onClick = async () => {
+        const supabase = createClientComponentClient()
+        const {
+            data: { session },
+          } = await supabase.auth.getSession()
+        if (session) {
+            console.log('we are logged in!');
+        } else {
+            console.log('not logged in');
+            if (setShowAuth) {
+                setShowAuth(true);
+            }
+        }
+    }
+
+    const sendMeButton = sectionData ? (
+        <button onClick={onClick} className="font-PermanentMarker bg-spilltNavy py-1.5 px-4 rounded-full">
+            Send Me the List
+        </button>
+    ) : (<></>);
+
     return (
         <span key={"section data list"}>
             {sectionDataList}
+            {sectionData && sectionData.length > 0 && sendMeButton}
         </span>
     )
 }
