@@ -31,7 +31,7 @@ const EmailConfirmationForm: React.FC<EmailConfirmationFormProps> = ({ onEmailCo
                     />
                 </div>
                 <div className='flex flex-col space-y-2'>
-                    <button type="submit" className="font-PermanentMarker bg-spilltNavy py-1.5 px-4 rounded-full">
+                    <button type="submit" className="font-PermanentMarker text-white bg-spilltNavy py-1.5 px-4 rounded-full">
                         Confirm Email
                     </button>
                     <button onClick={dismissModal} className="font-PermanentMarker text-spilltNavy border-2 border-spilltNavy bg-white py-1.5 px-4 rounded-full">

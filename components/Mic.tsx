@@ -197,9 +197,7 @@ export default function Mic() {
     }, [setShowAuth, sectionData]);
 
     const confirmEmail = useCallback(async (email: string) => {
-        console.log('we called confirm email!!!', email);
         const response = await sendList(email, sectionData);
-        console.log('huh ok then', response);
         if (response) {
             setShowAuth(false);
             setShowEmailSuccess(true);

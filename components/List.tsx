@@ -33,6 +33,7 @@ export default function List(sectionData?: AisleData[], setShowAuth?: (shouldSho
     }) : (<></>);
 
     const onClick = async () => {
+        // TODO: add login + auth!
         const supabase = createClientComponentClient()
         const {
             data: { session },
@@ -47,7 +48,7 @@ export default function List(sectionData?: AisleData[], setShowAuth?: (shouldSho
     }
 
     const sendMeButton = sectionData ? (
-        <button onClick={onClick} className="font-PermanentMarker bg-spilltNavy py-1.5 px-4 rounded-full">
+        <button onClick={onClick} className="font-PermanentMarker text-white bg-spilltNavy py-1.5 px-4 rounded-full">
             Send Me the List
         </button>
     ) : (<></>);
