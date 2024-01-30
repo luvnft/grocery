@@ -22,12 +22,12 @@ export default function Index() {
         <p>
           Powered by{' '}
           <a
-            href="https://spillt.co/"
+            href="https://arvrtise/"
             target="_blank"
             className="font-bold hover:underline"
             rel="noreferrer"
           >
-            Supabase & Spillt
+            Arvrtise
           </a>
         </p>
       </footer>
